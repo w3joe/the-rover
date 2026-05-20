@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "mission": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
     "@mars/shared": "workspace:*",

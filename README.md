@@ -21,6 +21,14 @@ ANTHROPIC_API_KEY=sk-... pnpm dev          # sonnet (default)
 1. Open the viewer and wait for **Connected to agent server**
 2. Pick a preset (or build a custom mission) and click **Launch**
 
+### Tests
+
+```bash
+pnpm test
+```
+
+Runs a headless integration test: a scripted navigator uses the same tool dispatch path as the LLM agent and completes the **Beacon Reach** preset.
+
 ## Agent tools
 
 `move` · `turn` · `aim_mast` · `look` · `scan` · `sample` · `photograph` · `repair` · `wait` · `note` · `submit_mission_step`
@@ -51,28 +59,30 @@ Presets include shorter drills; **Endurance Run** is the full chain (harder star
 
 **Results:** world text (`Moved 20.0m. Battery -10.0%.`, FOV landmark list from `look()`, etc.). The viewer **Agent log** shows each turn; WebSocket messages on port 3001 have the full trace.
 
-## Design choices
+## Design
 
-### **Observations**
-Each turn the agent gets one JSON snapshot (no camera image): pose, battery, weather, `visibility_m`, inventory, mission goal/hint, and a `visible` list of landmarks currently in frame. Vision is deliberately limited and mostly text-based:
+The rover is built like a production agent loop: The model only proposes validated tool calls, and every turn is a small JSON observation. That keeps runs debuggable in the viewer or headless, makes mission progress auditable (`submit_mission_step` gates objectives), and mirrors how I would deploy a real ops agent with discrete actions, explicit costs, legible failures.
 
-- **Automatic FOV** — Landmarks appear in `visible` only if they are within **±90° of heading** and closer than **`visibility_m`** (clear ≈ 80 m, dusty ≈ 35 m, storm ≈ 15 m). Each entry has `bearing_deg`, `range_m`, and tags; rock minerals appear only after a `scan()`.
-- **`look()` (1% battery)** — Opt-in mast-camera report: same FOV rules as above, formatted as a readable landmark list (heading, weather, ranges). Still **no image**; use this when you want a clearer picture than the compact `visible` array.
-- **`photograph()` (1% battery)** — Stricter than `look()`: target must be **≤ 40 m** and within **±45° of heading** (aim with `aim_mast` / `turn` first). On success the world records the photo; a **PNG** is attached to the tool result only when the **viewer is open** (3 s capture timeout via WebSocket). Headless runs still complete photograph objectives from range/angle checks alone.
-- **History compression** — On long runs, older turns keep a digest of observations (`visible_count`), so distant FOV detail can fade unless stored in `note()`.
+**Observations** — One snapshot per turn (pose, battery, weather, `visibility_m`, inventory, mission goal/hint, `visible` landmarks). Vision is deliberately text-first so the agent reasons over structure, not screenshots:
 
-### **Action space** 
-11 named tools (`move`, `turn`, `scan`, …) with server-side validation and battery/sol costs. That matches how LLM agents are deployed, makes failures legible (“must scan first”, “off-frame”), and ties mission steps to explicit tools. `note()` is free so the agent can keep a plan across long runs and decide what is important memory to store.
+- **Automatic FOV** — Landmarks appear in `visible` only within **±90° of heading** and **`visibility_m`** (clear ≈ 80 m, dusty ≈ 35 m, storm ≈ 15 m). Rock minerals appear only after `scan()`.
+- **`look()`** — Same FOV rules, formatted for reading; still no image (1% battery).
+- **`photograph()`** — Tighter gate (≤ 40 m, ±45°); server records success for objectives; PNG only when the viewer is connected (3 s capture timeout).
+- **History compression** — Older turns keep a digest of observations (`visible_count`); the agent is expected to use free `note()` for anything that must survive compression.
 
-### **What worked**
-Beacon-without giving the actual bearings and coordinates produced sensible explore-and-refine behavior from the agent.
-Agent is aware that distinct samples have to be collected and would continue to proceed with the mission if similar sample types were scanned.
-Compressing old chat history (`history.ts`) let full missions finish without blowing context. 
-Server-authoritative world means the mission runs headless and works without the frontend if required.
+**Action space** — Eleven named tools with server-side validation and battery/sol costs. Named tools match how LLM agents are actually wired, make failures actionable (“must scan first”, “off-frame”), and tie each mission step to an explicit action.
 
-### **What didn’t**
-Very long runs still lose detail in compressed history.
- `photograph` images only arrive when the viewer is open (3s timeout).
- Haiku sometimes loops on bad moves and doesnt consider battery depletion, opus/sonnet are more reliable for the full 5-step chain.
+## **What worked**
 
+- Beacon distance without bearing/coordinates produced explore-and-refine behavior instead of cheating coordinates.
+- The model generally keeps sampling after duplicate mineral scans when distinct types are required.
+- `history.ts` compression let full missions finish without blowing context.
+- Server-authoritative world runs headless; the viewer is optional.
 
+## **Limitations and next steps**
+
+| Limitation | Next step |
+|------------|-----------|
+| Compressed history drops fine-grained FOV detail on very long runs | Tier summaries (objective-level digests) or pin `note()` entries into the compressed window |
+| `photograph` PNGs only when the viewer is open | Server-side POV render fallback (Puppeteer or shared headless Three.js) so artifacts always attach |
+| Haiku sometimes loops on bad moves and ignores battery on the full chain | Smaller-model prompt tuning, a battery “panic” hint in observations, or a lightweight planner pass before tool selection |

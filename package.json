@@ -2,6 +2,7 @@
   "name": "mars-rover-agent",
   "private": true,
   "scripts": {
+    "test": "pnpm --filter @mars/server test",
     "mission": "pnpm --filter @mars/server mission",
     "viewer": "pnpm --filter @mars/client dev",
     "dev": "bash ./run.sh",
