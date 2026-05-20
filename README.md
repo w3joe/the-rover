@@ -54,7 +54,12 @@ Presets include shorter drills; **Endurance Run** is the full chain (harder star
 ## Design choices
 
 **Observations**
-Each turn the agent gets one JSON snapshot: pose, battery, weather, inventory, mission goal/hint, landmarks in FOV (`bearing_deg`, `range_m`), plus `known_landmarks` for things it has seen before. Vision is opt-in: `look()` returns a text FOV report; `photograph()` can attach a PNG from the viewer when connected. `beacon_A` is range-only (`beacon_ping_m`) so navigation is real triangulation.
+Each turn the agent gets one JSON snapshot (no camera image): pose, battery, weather, `visibility_m`, inventory, mission goal/hint, and a `visible` list of landmarks currently in frame. Vision is deliberately limited and mostly text-based:
+
+- **Automatic FOV** — Landmarks appear in `visible` only if they are within **±90° of heading** and closer than **`visibility_m`** (clear ≈ 80 m, dusty ≈ 35 m, storm ≈ 15 m). Each entry has `bearing_deg`, `range_m`, and tags; rock minerals appear only after a `scan()`.
+- **`look()` (1% battery)** — Opt-in mast-camera report: same FOV rules as above, formatted as a readable landmark list (heading, weather, ranges). Still **no image**; use this when you want a clearer picture than the compact `visible` array.
+- **`photograph()` (1% battery)** — Stricter than `look()`: target must be **≤ 40 m** and within **±45° of heading** (aim with `aim_mast` / `turn` first). On success the world records the photo; a **PNG** is attached to the tool result only when the **viewer is open** (3 s capture timeout via WebSocket). Headless runs still complete photograph objectives from range/angle checks alone.
+- **History compression** — On long runs, older turns keep a digest of observations (`visible_count`), so distant FOV detail can fade unless stored in `note()`.
 
 **Action space** 
 11 named tools (`move`, `turn`, `scan`, …) with server-side validation and battery/sol costs. That matches how LLM agents are deployed, makes failures legible (“must scan first”, “off-frame”), and ties mission steps to explicit tools. `note()` is free so the agent can keep a plan across long runs and decide what is important memory to store.
