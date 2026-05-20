@@ -53,7 +53,7 @@ Presets include shorter drills; **Endurance Run** is the full chain (harder star
 
 ## Design choices
 
-**Observations**
+### **Observations**
 Each turn the agent gets one JSON snapshot (no camera image): pose, battery, weather, `visibility_m`, inventory, mission goal/hint, and a `visible` list of landmarks currently in frame. Vision is deliberately limited and mostly text-based:
 
 - **Automatic FOV** — Landmarks appear in `visible` only if they are within **±90° of heading** and closer than **`visibility_m`** (clear ≈ 80 m, dusty ≈ 35 m, storm ≈ 15 m). Each entry has `bearing_deg`, `range_m`, and tags; rock minerals appear only after a `scan()`.
@@ -61,16 +61,16 @@ Each turn the agent gets one JSON snapshot (no camera image): pose, battery, wea
 - **`photograph()` (1% battery)** — Stricter than `look()`: target must be **≤ 40 m** and within **±45° of heading** (aim with `aim_mast` / `turn` first). On success the world records the photo; a **PNG** is attached to the tool result only when the **viewer is open** (3 s capture timeout via WebSocket). Headless runs still complete photograph objectives from range/angle checks alone.
 - **History compression** — On long runs, older turns keep a digest of observations (`visible_count`), so distant FOV detail can fade unless stored in `note()`.
 
-**Action space** 
+### **Action space** 
 11 named tools (`move`, `turn`, `scan`, …) with server-side validation and battery/sol costs. That matches how LLM agents are deployed, makes failures legible (“must scan first”, “off-frame”), and ties mission steps to explicit tools. `note()` is free so the agent can keep a plan across long runs and decide what is important memory to store.
 
-**What worked**
+### **What worked**
 Beacon-without giving the actual bearings and coordinates produced sensible explore-and-refine behavior from the agent.
 Agent is aware that distinct samples have to be collected and would continue to proceed with the mission if similar sample types were scanned.
 Compressing old chat history (`history.ts`) let full missions finish without blowing context. 
 Server-authoritative world means the mission runs headless and works without the frontend if required.
 
-**What didn’t**
+### **What didn’t**
 Very long runs still lose detail in compressed history.
  `photograph` images only arrive when the viewer is open (3s timeout).
  Haiku sometimes loops on bad moves and doesnt consider battery depletion, opus/sonnet are more reliable for the full 5-step chain.
