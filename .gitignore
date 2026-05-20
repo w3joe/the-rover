@@ -1,0 +1,34 @@
+# Dependencies (pnpm hoists to root; package-level node_modules are symlinks)
+node_modules/
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Vite cache (under package node_modules when dev server runs)
+.vite/
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Puppeteer browser cache
+.cache/
+
+# Test / coverage
+coverage/

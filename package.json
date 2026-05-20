@@ -1,0 +1,15 @@
+{
+  "name": "mars-rover-agent",
+  "private": true,
+  "scripts": {
+    "mission": "pnpm --filter @mars/server mission",
+    "viewer": "pnpm --filter @mars/client dev",
+    "dev": "bash ./run.sh",
+    "dev:haiku": "bash ./run.sh haiku",
+    "dev:sonnet": "bash ./run.sh sonnet",
+    "dev:opus": "bash ./run.sh opus"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "puppeteer"]
+  }
+}

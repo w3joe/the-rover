@@ -1,0 +1,20 @@
+{
+  "name": "@mars/server",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "mission": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@mars/shared": "workspace:*",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "puppeteer": "^24.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.14",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
