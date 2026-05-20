@@ -131,6 +131,9 @@ export interface MissionReview {
 
 // ── World snapshot & telemetry ─────────────────────────────────────────────
 
+export type SpeedMultiplier = 1 | 4 | 8
+export const DEFAULT_SPEED_MULTIPLIER: SpeedMultiplier = 8
+
 export interface WorldSnapshot {
   rover: RoverState
   landmarks: Landmark[]
@@ -141,7 +144,7 @@ export interface WorldSnapshot {
   stepCount: number
   beaconRangeM: number
   paused: boolean
-  speed: 1 | 4 | 8
+  speed: SpeedMultiplier
 }
 
 export interface ToolCallLog {
@@ -170,7 +173,7 @@ export type WSClientMessage =
   | { type: 'cancel_mission' }
   | { type: 'pause_mission' }
   | { type: 'resume_mission' }
-  | { type: 'set_speed'; multiplier: 1 | 4 | 8 }
+  | { type: 'set_speed'; multiplier: SpeedMultiplier }
   | { type: 'pov_capture'; captureId: string; imageBase64: string }
 
 export interface AgentObservation {

@@ -3,6 +3,7 @@ import { runMission } from './agent/loop.js'
 import { createWSServer } from './ws/server.js'
 import { PRESET_MISSIONS } from './world/mission.js'
 import { landmarkCatalog } from './world/landmarks.js'
+import { DEFAULT_SPEED_MULTIPLIER } from '@mars/shared'
 import type { MissionDef, WorldSnapshot, WSClientMessage } from '@mars/shared'
 
 const WS_PORT = 3001
@@ -42,6 +43,7 @@ async function main() {
 
   function resetWorld(): World {
     const w = new World(presets[0], requestClientPovCapture)
+    w.setSpeed(DEFAULT_SPEED_MULTIPLIER)
     w.setStepCallback(() => {
       broadcast({ type: 'state', snapshot: w.getSnapshot() })
     })
@@ -92,6 +94,7 @@ async function main() {
     missionAbort = ac
 
     world = new World(missionDef, requestClientPovCapture)
+    world.setSpeed(DEFAULT_SPEED_MULTIPLIER)
     world.setStepCallback(() => {
       broadcast({ type: 'state', snapshot: world.getSnapshot() })
     })

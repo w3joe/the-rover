@@ -14,7 +14,8 @@ import {
   setMissionStarting,
 } from './ui.js'
 import { buildReviewFromSnapshot, hideMissionReview, showMissionReview } from './review.js'
-import type { MissionDef, WSClientMessage, WSMessage, WorldSnapshot } from '@mars/shared'
+import { DEFAULT_SPEED_MULTIPLIER } from '@mars/shared'
+import type { MissionDef, SpeedMultiplier, WSClientMessage, WSMessage, WorldSnapshot } from '@mars/shared'
 
 const WS_URL = 'ws://localhost:3001'
 const RECONNECT_DELAY = 3000
@@ -80,7 +81,7 @@ function wipeMissionClient(): void {
 function setupSpeedButtons(): void {
   document.querySelectorAll<HTMLButtonElement>('.speed-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const multiplier = Number(btn.dataset.speed) as 1 | 4 | 8
+      const multiplier = Number(btn.dataset.speed) as SpeedMultiplier
       send({ type: 'set_speed', multiplier })
       document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'))
       btn.classList.add('active')
@@ -88,7 +89,7 @@ function setupSpeedButtons(): void {
   })
 }
 
-function setSpeedActive(speed: 1 | 4 | 8): void {
+function setSpeedActive(speed: SpeedMultiplier): void {
   document.querySelectorAll<HTMLButtonElement>('.speed-btn').forEach(btn => {
     btn.classList.toggle('active', Number(btn.dataset.speed) === speed)
   })
@@ -121,6 +122,8 @@ function onLaunchMission(mission: MissionDef): void {
   missionStarted = true
   setMissionStarting(mission.name)
   setMissionRunning()
+  setSpeedActive(DEFAULT_SPEED_MULTIPLIER)
+  send({ type: 'set_speed', multiplier: DEFAULT_SPEED_MULTIPLIER })
   send({ type: 'start_mission', mission })
   addLog(`Launching: ${mission.name}`)
 }
@@ -168,8 +171,8 @@ function connect(): void {
   ws.onopen = () => {
     addLog('Connected.')
     setupButtons()
-    setSpeedActive(8)
-    send({ type: 'set_speed', multiplier: 8 })
+    setSpeedActive(DEFAULT_SPEED_MULTIPLIER)
+    send({ type: 'set_speed', multiplier: DEFAULT_SPEED_MULTIPLIER })
     setReviewCloseHandler(onReviewClose)
     if (missionStarted && !isPaused) setMissionRunning()
   }

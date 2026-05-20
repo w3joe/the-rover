@@ -1,15 +1,17 @@
-import type {
-  AgentObservation,
-  CollectedArtifact,
-  KnownLandmark,
-  Landmark,
-  MissionDef,
-  MissionReview,
-  MissionStatus,
-  Objective,
-  RoverState,
-  VisibleObject,
-  WorldSnapshot,
+import {
+  DEFAULT_SPEED_MULTIPLIER,
+  type AgentObservation,
+  type CollectedArtifact,
+  type KnownLandmark,
+  type Landmark,
+  type MissionDef,
+  type MissionReview,
+  type MissionStatus,
+  type Objective,
+  type RoverState,
+  type SpeedMultiplier,
+  type VisibleObject,
+  type WorldSnapshot,
 } from '@mars/shared'
 import {
   generateHeightmap,
@@ -65,7 +67,7 @@ export class World {
   private cancelled = false
   private resumeCallbacks: Array<() => void> = []
   private onStep?: () => void
-  public speedMultiplier: 1 | 4 | 8 = 8
+  public speedMultiplier: SpeedMultiplier = DEFAULT_SPEED_MULTIPLIER
 
   constructor(
     private missionDef: MissionDef,
@@ -138,7 +140,7 @@ export class World {
     return this.cancelled
   }
 
-  setSpeed(multiplier: 1 | 4 | 8): void {
+  setSpeed(multiplier: SpeedMultiplier): void {
     this.speedMultiplier = multiplier
   }
 
