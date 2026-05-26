@@ -4,7 +4,7 @@ A fully-autonomous rover completes science missions on Mars. Tool calls, battery
 
 <img width="1472" height="802" alt="image" src="https://github.com/user-attachments/assets/71be29aa-32d8-47c4-9d24-3f294528cc45" />
 
-<video src="https://github.com/w3joe/the-rover/the-rover-video.mov" width="100%" controls></video>
+<video src="https://github.com/w3joe/the-rover/blob/main/the-rover-video.mov" width="100%" controls></video>
 
 
 ## Run command
