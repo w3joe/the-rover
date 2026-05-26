@@ -1,12 +1,10 @@
-
-
 # Mars Rover Agent
 
 A fully-autonomous rover completes science missions on Mars. Tool calls, battery, weather, and time pressure are constraints.
 
 <img width="1472" height="802" alt="image" src="https://github.com/user-attachments/assets/71be29aa-32d8-47c4-9d24-3f294528cc45" />
 
-<video src="https://github.com/user-attachments/assets/b1f883e8-4246-4649-803c-a0b2a5e2f676" width="100%" controls></video>
+<video src="https://github.com/user-attachments/assets/b87016fd-da92-4660-9a77-0d52494c4898" width="100%" controls></video>
 
 
 
